@@ -7,18 +7,16 @@ import net.neuralm.client.messages.serializer.ISerializer;
 
 public class Message {
 
-    private final byte[] headerByes;
+    private final byte[] headerBytes;
     private final byte[] bodyBytes;
 
-    MessageHeader header;
-
-    public Message(byte[] headerByes, byte[] bodyBytes) {
-        this.headerByes = headerByes;
+    private Message(byte[] headerBytes, byte[] bodyBytes) {
+        this.headerBytes = headerBytes;
         this.bodyBytes = bodyBytes;
     }
 
-    public byte[] getHeaderByes() {
-        return headerByes;
+    public byte[] getHeaderBytes() {
+        return headerBytes;
     }
 
     public byte[] getBodyBytes() {
@@ -35,9 +33,14 @@ public class Message {
         return new Message(headerBytes, bodyBytes);
     }
 
-    public Object deconstructMessageBody(ISerializer serializer) {
-        header = MessageHeader.parseHeader(headerByes);
+    public int getTotalSize() {
+        return headerBytes.length + bodyBytes.length;
+    }
 
+    public Object deconstructMessageBody(ISerializer serializer) {
+        MessageHeader header = MessageHeader.parseHeader(headerBytes);
+        if (header == null)
+            return null;
         return serializer.deserialize(bodyBytes, header.getTypeName());
     }
 }

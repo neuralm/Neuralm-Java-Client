@@ -5,11 +5,10 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.AsynchronousSocketChannel;
-import java.nio.channels.CompletionHandler;
-import java.nio.charset.StandardCharsets;
 import java.util.Queue;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import net.neuralm.client.messages.Message;
 import net.neuralm.client.messages.requests.Request;
 import net.neuralm.client.messages.serializer.ISerializer;
@@ -20,13 +19,12 @@ public class NeuralmClient {
     private final int port;
     final boolean autoReconnect;
     final long autoReconnectWaitTime;
-    final ISerializer serializer;
+    private final ISerializer serializer;
 
-    AsynchronousSocketChannel channel;
-
+    private AsynchronousSocketChannel channel;
+    private ByteBuffer writeBuffer = ByteBuffer.allocate(0);
     private Queue<Message> sendQueue = new LinkedBlockingDeque<>();
-
-    boolean isWriting;
+    AtomicBoolean isWriting = new AtomicBoolean(false);
 
     /**
      * Create a new NeuralmClient to communicate with the NeuralmServer
@@ -53,7 +51,7 @@ public class NeuralmClient {
     void connect() throws IOException {
         System.out.println(String.format("Attempting to connect to %s::%s", host, port));
         channel = AsynchronousSocketChannel.open();
-        channel.connect(new InetSocketAddress(host, port), this, new ConnectionHandler());
+        channel.connect(new InetSocketAddress(host, port), this, new ConnectionHandler(channel));
     }
 
     void startReading() {
@@ -62,42 +60,38 @@ public class NeuralmClient {
     }
 
     public void send(Request request) {
-        send(Message.constructMessage(serializer, request));
+        Message message = Message.constructMessage(serializer, request);
+        if (writeBuffer.hasRemaining() || isWriting.get()) {
+            sendQueue.add(message);
+            System.out.println("Put message in queue!");
+            return;
+        }
+        isWriting.set(true);
+        System.out.println("isWriting is set to true");
+        hardSend(message);
     }
 
-    public void send(Message message) {
-//        if(isWriting) {
-//            sendQueue.add(message);
-//            return;
-//        }
+    void hardSend(Message message) {
+        writeBuffer = ByteBuffer.allocate(message.getHeaderBytes().length + message.getBodyBytes().length).order(ByteOrder.LITTLE_ENDIAN);
+        writeBuffer.put(message.getHeaderBytes());
+        writeBuffer.put(message.getBodyBytes());
+        writeBuffer.flip();
+        channel.write(writeBuffer, message, new WriteHandler(this));
+    }
 
-        ByteBuffer byteBuffer = ByteBuffer.allocate(message.getHeaderByes().length + message.getBodyBytes().length).order(ByteOrder.LITTLE_ENDIAN);
-        byteBuffer.put(message.getHeaderByes());
-        byteBuffer.put(message.getBodyBytes());
-        byteBuffer.flip();
+    Boolean hasMessagesInQueue() {
+        return !sendQueue.isEmpty();
+    }
 
-        try {
-            channel.write(byteBuffer/*, message, new CompletionHandler<Integer, Message>() {
-                @Override
-                public void completed(Integer result, Message attachment) {
-                    System.out.println(String.format("Send %s", message));
-                    isWriting = false;
-                    if(sendQueue.size()>0) {
-                        send(sendQueue.poll());
-                    }
-                }
+    Message getMessageFromQueue() {
+        return sendQueue.poll();
+    }
 
-                @Override
-                public void failed(Throwable exc, Message attachment) {
-                    isWriting = false;
+    void forceWriteBufferToCompletion() {
+        writeBuffer.position(writeBuffer.limit());
+    }
 
-                    System.err.println(String.format("Failed to send %s", message));
-                    exc.printStackTrace();
-                }
-            }*/).get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-//        isWriting = true;
+    boolean writeBufferHasRemaining() {
+        return writeBuffer.hasRemaining();
     }
 }

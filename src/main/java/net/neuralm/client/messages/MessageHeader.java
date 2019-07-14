@@ -4,9 +4,9 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-public class MessageHeader {
+class MessageHeader {
 
-    private final int bodySize;
+    private final int bodySize; // 4
     private String typeName;
 
     private MessageHeader(int bodySize, String typeName) {
@@ -43,7 +43,7 @@ public class MessageHeader {
         return new MessageHeader(bodySize, typeName);
     }
 
-    public String getTypeName() {
+    String getTypeName() {
         return typeName;
     }
 }
