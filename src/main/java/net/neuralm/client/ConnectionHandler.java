@@ -28,7 +28,7 @@ public class ConnectionHandler implements CompletionHandler<Void, NeuralmClient>
         System.err.println("Failed to connect!");
         exc.printStackTrace();
 
-        if(client.autoReconnect) {
+        if (client.autoReconnect) {
             try {
                 Thread.sleep(client.autoReconnectWaitTime);
                 client.connect();

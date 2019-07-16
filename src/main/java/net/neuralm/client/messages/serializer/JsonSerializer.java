@@ -3,12 +3,11 @@ package net.neuralm.client.messages.serializer;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import java.io.BufferedReader;
 import java.nio.charset.StandardCharsets;
 
 public class JsonSerializer implements ISerializer {
 
-    final Gson gson;
+    private final Gson gson;
 
     public JsonSerializer() {
         this.gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE).create();
@@ -22,17 +21,9 @@ public class JsonSerializer implements ISerializer {
     }
 
     @Override
-    public Object deserialize(byte[] bytes, String typeName) {
-        Class clazz;
-        try {
-            clazz = Class.forName(typeName);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        }
-
+    public <T> T deserialize(byte[] bytes, Class<T> type) {
         String json = new String(bytes, StandardCharsets.UTF_8);
 
-        return gson.fromJson(json, clazz);
+        return gson.fromJson(json, type);
     }
 }

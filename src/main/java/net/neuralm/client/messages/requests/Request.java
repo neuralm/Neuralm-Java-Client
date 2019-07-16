@@ -1,18 +1,15 @@
 package net.neuralm.client.messages.requests;
 
-import java.text.SimpleDateFormat;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.TimeZone;
 import java.util.UUID;
 
 public class Request {
 
-    UUID id;
+    public final UUID id;
 
-    String date;
+    public final String date;
 
     public Request() {
         id = UUID.randomUUID();
