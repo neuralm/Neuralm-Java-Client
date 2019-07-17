@@ -31,26 +31,32 @@ public class NeuralmClient {
 
 
     /**
-     * Create a new NeuralmClient to communicate with the NeuralmServer
+     * Create a new NeuralmClient to communicate with the NeuralmServer The connection is not started until {@link NeuralmClient#start()} is called. This so you can register listeners before the client starts
      *
      * @param host The neuralm server host
      * @param port The port the neuralm server is running on
      * @param autoReconnect Whether to automatically reconnect when the connection attempt fails
      * @param autoReconnectWaitTime How long to wait after a connect fails before reconnecting
      */
-    public NeuralmClient(String host, int port, ISerializer serializer, boolean autoReconnect, long autoReconnectWaitTime) throws IOException {
+    public NeuralmClient(String host, int port, ISerializer serializer, boolean autoReconnect, long autoReconnectWaitTime) {
         this.host = host;
         this.port = port;
         this.autoReconnect = autoReconnect;
         this.autoReconnectWaitTime = autoReconnectWaitTime;
         this.serializer = serializer;
         this.readHandler = new ReadHandler(this, serializer);
-
-        connect();
     }
 
     public NeuralmClient(String host, int port, ISerializer serializer) throws IOException {
         this(host, port, serializer, false, -1);
+    }
+
+    /***
+     * Start the client.
+     * @throws IOException
+     */
+    public void start() throws IOException {
+        connect();
     }
 
     void connect() throws IOException {
@@ -102,7 +108,7 @@ public class NeuralmClient {
         return writeBuffer.hasRemaining();
     }
 
-    public void addResponse(Response response) {
+    void addResponse(Response response) {
         propertyChangeSupport.firePropertyChange(response.getClass().getSimpleName(), null, response);
     }
 
@@ -112,5 +118,9 @@ public class NeuralmClient {
 
     public void removeListener(String eventName, PropertyChangeListener listener) {
         propertyChangeSupport.removePropertyChangeListener(eventName, listener);
+    }
+
+    void fireEvent(String eventName, NeuralmClient client) {
+        propertyChangeSupport.firePropertyChange(eventName, null, client);
     }
 }

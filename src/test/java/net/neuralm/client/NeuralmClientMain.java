@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Assertions;
 
 public class NeuralmClientMain {
     public static void main(String... args) throws IOException, InterruptedException {
-        NeuralmClient client = new NeuralmClient("127.0.0.1", 9999, new JsonSerializer(), true, 5*1000);
+        NeuralmClient client = new NeuralmClient("127.0.0.1", 25568, new JsonSerializer(), true, 5 * 1000);
 
         client.addListener("RegisterResponse", (changeEvent) -> {
             Request request = new AuthenticateRequest("suppergerrie2", "hi", "Name");
@@ -50,10 +50,13 @@ public class NeuralmClientMain {
             }
         });
 
-        Request request = new RegisterRequest("suppergerrie2", "hi", "Name");
-//        Request request = new AuthenticateRequest("suppergerrie2", "hi", "Name");
+        client.addListener("Connected", evt -> {
+            Request request = new RegisterRequest("suppergerrie2", "hi", "Name");
 
-        client.send(request);
+            client.send(request);
+        });
+
+        client.start();
 
         Thread.sleep(1000000);
     }
