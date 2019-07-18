@@ -36,7 +36,7 @@ public class Response {
 
     /***
      * A message from the server, this can be empty and often contains the reason why the request failed.
-     * {@see isSuccess}
+     * @see Response#isSuccess
      * @return A message from the server as a string
      */
     public String getMessage() {

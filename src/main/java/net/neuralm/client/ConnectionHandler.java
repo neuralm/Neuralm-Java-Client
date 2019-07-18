@@ -20,6 +20,8 @@ public class ConnectionHandler implements CompletionHandler<Void, NeuralmClient>
             e.printStackTrace();
         }
 
+        client.fireEvent("Connected", client);
+
         client.startReading();
     }
 
@@ -27,6 +29,8 @@ public class ConnectionHandler implements CompletionHandler<Void, NeuralmClient>
     public void failed(Throwable exc, NeuralmClient client) {
         System.err.println("Failed to connect!");
         exc.printStackTrace();
+
+        client.fireEvent("ConnectingFailed", client);
 
         if (client.autoReconnect) {
             try {
