@@ -1,24 +1,26 @@
 package net.neuralm.client;
 
-import java.io.IOException;
-import net.neuralm.client.messages.requests.AuthenticateRequest;
-import net.neuralm.client.messages.requests.CreateTrainingRoomRequest;
-import net.neuralm.client.messages.requests.GetEnabledTrainingRoomsRequest;
-import net.neuralm.client.messages.requests.RegisterRequest;
-import net.neuralm.client.messages.requests.Request;
+import net.neuralm.client.messages.requests.*;
 import net.neuralm.client.messages.responses.AuthenticateResponse;
 import net.neuralm.client.messages.responses.GetEnabledTrainingRoomsResponse;
 import net.neuralm.client.messages.responses.Response;
 import net.neuralm.client.messages.serializer.JsonSerializer;
 import net.neuralm.client.neat.TrainingRoom;
 import net.neuralm.client.neat.TrainingRoomSettings;
-import org.junit.jupiter.api.Assertions;
+
+import java.io.IOException;
 
 public class NeuralmClientMain {
     public static void main(String... args) throws IOException, InterruptedException {
-        NeuralmClient client = new NeuralmClient("127.0.0.1", 25568, new JsonSerializer(), true, 5 * 1000);
+        String host = args.length >= 1 ? args[0] : "127.0.0.1";
+        int port = args.length >= 2 ? Integer.parseInt(args[1]) : 9999;
+
+        NeuralmClient client = new NeuralmClient(host, port, new JsonSerializer(), true, 5 * 1000);
 
         client.addListener("RegisterResponse", (changeEvent) -> {
+            Response response = (Response) changeEvent.getNewValue();
+            System.out.println(response.isSuccess() ? "Registered..." : String.format("Registering failed: %s", response.getMessage()));
+
             Request request = new AuthenticateRequest("suppergerrie2", "hi", "Name");
             client.send(request);
         });
@@ -26,8 +28,8 @@ public class NeuralmClientMain {
         client.addListener("AuthenticateResponse", (changeEvent) -> {
             AuthenticateResponse response = (AuthenticateResponse) changeEvent.getNewValue();
 
-            Assertions.assertTrue(response.isSuccess(), "Couldn't authenticate");
-// 384cc1f1-2506-45b6-72c7-08d709ce803c
+            System.out.println(response.isSuccess() ? "Authenticated..." : String.format("Authenticating failed: %s", response.getMessage()));
+
             client.send(new CreateTrainingRoomRequest(response.getUserId(), "supperroom", new TrainingRoomSettings()));
         });
 
