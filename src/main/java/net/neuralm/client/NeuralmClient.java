@@ -1,5 +1,10 @@
 package net.neuralm.client;
 
+import net.neuralm.client.messages.Message;
+import net.neuralm.client.messages.requests.Request;
+import net.neuralm.client.messages.responses.Response;
+import net.neuralm.client.messages.serializer.ISerializer;
+
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
@@ -7,13 +12,10 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.AsynchronousSocketChannel;
+import java.nio.channels.CompletionHandler;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
-import net.neuralm.client.messages.Message;
-import net.neuralm.client.messages.requests.Request;
-import net.neuralm.client.messages.responses.Response;
-import net.neuralm.client.messages.serializer.ISerializer;
 
 public class NeuralmClient {
 
@@ -47,7 +49,7 @@ public class NeuralmClient {
         this.readHandler = new ReadHandler(this, serializer);
     }
 
-    public NeuralmClient(String host, int port, ISerializer serializer) throws IOException {
+    public NeuralmClient(String host, int port, ISerializer serializer) {
         this(host, port, serializer, false, -1);
     }
 
@@ -85,11 +87,24 @@ public class NeuralmClient {
     }
 
     void hardSend(Message message) {
-        writeBuffer = ByteBuffer.allocate(message.getHeaderBytes().length + message.getBodyBytes().length).order(ByteOrder.LITTLE_ENDIAN);
+        writeBuffer = ByteBuffer.allocate(message.getHeaderBytes().length).order(ByteOrder.LITTLE_ENDIAN);
         writeBuffer.put(message.getHeaderBytes());
-        writeBuffer.put(message.getBodyBytes());
         writeBuffer.flip();
-        channel.write(writeBuffer, message, new WriteHandler(this));
+        WriteHandler handler = new WriteHandler(this);
+        channel.write(writeBuffer, message, new CompletionHandler<Integer, Message>() {
+            @Override
+            public void completed(Integer result, Message attachment) {
+                writeBuffer = ByteBuffer.allocate(message.getBodyBytes().length).order(ByteOrder.LITTLE_ENDIAN);
+                writeBuffer.put(message.getBodyBytes());
+                writeBuffer.flip();
+                channel.write(writeBuffer, message, handler);
+            }
+
+            @Override
+            public void failed(Throwable exc, Message attachment) {
+                exc.printStackTrace();
+            }
+        });
     }
 
     Boolean hasMessagesInQueue() {
