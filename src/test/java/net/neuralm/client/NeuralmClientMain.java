@@ -58,7 +58,11 @@ public class NeuralmClientMain {
             client.send(request);
         });
 
-        client.start();
+        try {
+            client.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         Thread.sleep(1000000);
     }

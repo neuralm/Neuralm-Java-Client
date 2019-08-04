@@ -10,11 +10,10 @@ import net.neuralm.client.messages.serializer.ISerializer;
 public class ReadHandler implements CompletionHandler<Integer, ByteBuffer> {
 
     private final NeuralmClient client;
+    private final ISerializer serializer;
+    private MessageHeader currentHeader;
 
-    MessageHeader currentHeader;
-    ISerializer serializer;
-
-    public ReadHandler(NeuralmClient client, ISerializer serializer) {
+    ReadHandler(NeuralmClient client, ISerializer serializer) {
         this.client = client;
         this.serializer = serializer;
     }

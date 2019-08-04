@@ -19,6 +19,7 @@ import java.nio.ByteOrder;
 import java.nio.channels.CompletionHandler;
 import java.nio.channels.SocketChannel;
 import java.util.Queue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -32,13 +33,15 @@ public class NeuralmClient {
     private final ISerializer serializer;
     private final ReadHandler readHandler;
     AtomicBoolean isWriting = new AtomicBoolean(false);
-    private AsynchronousTlsChannel channel;
+    private AsynchronousSSLChannel channel;
     private ByteBuffer writeBuffer = ByteBuffer.allocate(0);
     private Queue<Message> sendQueue = new LinkedBlockingDeque<>();
 
 
     /**
-     * Create a new NeuralmClient to communicate with the NeuralmServer The connection is not started until {@link NeuralmClient#start()} is called. This so you can register listeners before the client starts
+     * Create a new NeuralmClient to communicate with the NeuralmServer.
+     * The connection is not started until {@link NeuralmClient#start()} is called.
+     * This is done so that listeners can be registered before the client starts.
      *
      * @param host                  The neuralm server host
      * @param port                  The port the neuralm server is running on
@@ -60,37 +63,16 @@ public class NeuralmClient {
 
     /***
      * Start the client.
-     * @throws IOException
+     * @throws Exception
      */
-    public void start() throws IOException {
+    public void start() throws Exception {
         connect();
     }
 
-    void connect() throws IOException {
-        //TODO: Make connection async again, it is not blocking
+    void connect() throws Exception {
         System.out.println(String.format("Attempting to connect to %s::%s", host, port));
-        SocketChannel rawChannel = SocketChannel.open();
-        rawChannel.connect(new InetSocketAddress(host, port));
-
-        rawChannel.configureBlocking(false);
-
-        AsynchronousTlsChannelGroup channelGroup = new AsynchronousTlsChannelGroup();
-
-        try {
-            SSLContext sc = SSLContext.getDefault();
-
-            TlsChannel tlsChannel = ClientTlsChannel
-                    .newBuilder(rawChannel, sc)
-                    .build();
-
-            channel = new AsynchronousTlsChannel(channelGroup, tlsChannel, rawChannel);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        fireEvent("Connected", this);
-        startReading();
-
+        channel = new AsynchronousSSLChannel("TLSv1.2", host, port);
+        channel.connect(this, new ConnectionHandler(channel));
     }
 
     void startReading() {
@@ -99,7 +81,11 @@ public class NeuralmClient {
 
     void startReading(int size) {
         ByteBuffer buffer = ByteBuffer.allocate(size).order(ByteOrder.LITTLE_ENDIAN);
-        channel.read(buffer, buffer, readHandler);
+        try {
+            channel.read(buffer, buffer, readHandler);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void send(Request request) {
@@ -117,20 +103,29 @@ public class NeuralmClient {
         writeBuffer.put(message.getHeaderBytes());
         writeBuffer.flip();
         WriteHandler handler = new WriteHandler(this);
-        channel.write(writeBuffer, message, new CompletionHandler<Integer, Message>() {
-            @Override
-            public void completed(Integer result, Message attachment) {
-                writeBuffer = ByteBuffer.allocate(message.getBodyBytes().length).order(ByteOrder.LITTLE_ENDIAN);
-                writeBuffer.put(message.getBodyBytes());
-                writeBuffer.flip();
-                channel.write(writeBuffer, message, handler);
-            }
+        try {
+            channel.write(writeBuffer, message, new CompletionHandler<Integer, Message>() {
+                @Override
+                public void completed(Integer result, Message attachment) {
+                    writeBuffer = ByteBuffer.allocate(message.getBodyBytes().length).order(ByteOrder.LITTLE_ENDIAN);
+                    writeBuffer.put(message.getBodyBytes());
+                    writeBuffer.flip();
+                    try {
+                        channel.write(writeBuffer, message, handler);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        failed(e, attachment);
+                    }
+                }
 
-            @Override
-            public void failed(Throwable exc, Message attachment) {
-                exc.printStackTrace();
-            }
-        });
+                @Override
+                public void failed(Throwable exc, Message attachment) {
+                    exc.printStackTrace();
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     Boolean hasMessagesInQueue() {

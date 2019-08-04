@@ -6,9 +6,9 @@ import java.nio.channels.CompletionHandler;
 
 public class ConnectionHandler implements CompletionHandler<Void, NeuralmClient> {
 
-    private final AsynchronousSocketChannel channel;
+    private final AsynchronousSSLChannel channel;
 
-    ConnectionHandler(AsynchronousSocketChannel channel) {
+    ConnectionHandler(AsynchronousSSLChannel channel) {
         this.channel = channel;
     }
 
@@ -36,7 +36,7 @@ public class ConnectionHandler implements CompletionHandler<Void, NeuralmClient>
             try {
                 Thread.sleep(client.autoReconnectWaitTime);
                 client.connect();
-            } catch (InterruptedException | IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
