@@ -1,11 +1,15 @@
 package net.neuralm.client.neat;
 
+import java.util.UUID;
 import net.neuralm.client.neat.neurons.AbstractNeuron;
 
 public class ConnectionGene {
 
+    UUID id;
+    UUID brainId;
     private int inID;
     private int outID;
+    private int innovationNumber;
     private double weight;
     private boolean enabled;
 

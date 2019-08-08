@@ -3,6 +3,7 @@ package net.neuralm.client.neat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 import net.neuralm.client.neat.neurons.AbstractNeuron;
 import net.neuralm.client.neat.neurons.HiddenNeuron;
 import net.neuralm.client.neat.neurons.InputNeuron;
@@ -10,12 +11,17 @@ import net.neuralm.client.neat.neurons.OutputNeuron;
 
 public class Brain {
 
+    UUID id;
+    UUID trainingRoomId;
+    UUID organismId;
+    private List<ConnectionGene> connectionGenes = new ArrayList<>();
+
     private final List<OutputNeuron> outputNeurons = new ArrayList<>();
     private final List<InputNeuron> inputNeurons = new ArrayList<>();
     private final HashMap<Integer, AbstractNeuron> neurons = new HashMap<>();
     private int inputCount;
     private int outputCount;
-    private List<ConnectionGene> connectionGenes = new ArrayList<>();
+
 
     private boolean buildStructure = false;
 

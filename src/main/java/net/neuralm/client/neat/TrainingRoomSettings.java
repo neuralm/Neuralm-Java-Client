@@ -7,24 +7,24 @@ public class TrainingRoomSettings {
 
     static Random random = new Random();
 
-    public UUID id = UUID.randomUUID();
-    public int brainCount = 100;
-    public int inputCount = 3;
-    public int outputCount = 1;
-    public double c1 = 1;
-    public double c2 = 0.4;
-    public double c3 = 0.4;
-    public double threshold = 3;
-    public double addConnectionChance = 0.05;
-    public double addNodeChance = 0.03;
-    public double crossOverChance = 0.75;
-    public double interSpeciesChance = 0.001;
-    public double mutationChance = 1;
-    public double mutateWeightChance = 0.8;
-    public double weightReassignChance = 0.1;
-    public double topAmountToSurvive = 0.2;
-    public double enableConnectionChance = 0.25;
-    public int seed = random.nextInt();
+    private UUID id = UUID.randomUUID();
+    private int organismCount = 100;
+    private int inputCount = 3;
+    private int outputCount = 1;
+    private double c1 = 1;
+    private double c2 = 0.4;
+    private double c3 = 0.4;
+    private double threshold = 3;
+    private double addConnectionChance = 0.05;
+    private double addNodeChance = 0.03;
+    private double crossOverChance = 0.75;
+    private double interSpeciesChance = 0.001;
+    private double mutationChance = 1;
+    private double mutateWeightChance = 0.8;
+    private double weightReassignChance = 0.1;
+    private double topAmountToSurvive = 0.2;
+    private double enableConnectionChance = 0.25;
+    private int seed = random.nextInt();
 
     public UUID getId() {
         return id;
@@ -35,12 +35,12 @@ public class TrainingRoomSettings {
         return this;
     }
 
-    public int getBrainCount() {
-        return brainCount;
+    public int getOrganismCount() {
+        return organismCount;
     }
 
-    public TrainingRoomSettings setBrainCount(int brainCount) {
-        this.brainCount = brainCount;
+    public TrainingRoomSettings setOrganismCount(int organismCount) {
+        this.organismCount = organismCount;
         return this;
     }
 
