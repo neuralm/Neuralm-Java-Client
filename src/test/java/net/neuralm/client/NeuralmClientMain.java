@@ -1,11 +1,15 @@
 package net.neuralm.client;
 
 import java.io.IOException;
+import java.util.Random;
 import java.util.UUID;
+import net.neuralm.client.entities.TrainingSession;
 import net.neuralm.client.messages.requests.AuthenticateRequest;
 import net.neuralm.client.messages.requests.CreateTrainingRoomRequest;
+import net.neuralm.client.messages.requests.EndTrainingSessionRequest;
 import net.neuralm.client.messages.requests.GetEnabledTrainingRoomsRequest;
 import net.neuralm.client.messages.requests.GetOrganismsRequest;
+import net.neuralm.client.messages.requests.PostOrganismsScoreRequest;
 import net.neuralm.client.messages.requests.RegisterRequest;
 import net.neuralm.client.messages.requests.Request;
 import net.neuralm.client.messages.requests.StartTrainingSessionRequest;
@@ -13,6 +17,7 @@ import net.neuralm.client.messages.responses.AuthenticateResponse;
 import net.neuralm.client.messages.responses.CreateTrainingRoomResponse;
 import net.neuralm.client.messages.responses.GetEnabledTrainingRoomsResponse;
 import net.neuralm.client.messages.responses.GetOrganismsResponse;
+import net.neuralm.client.messages.responses.PostOrganismsScoreResponse;
 import net.neuralm.client.messages.responses.Response;
 import net.neuralm.client.messages.responses.StartTrainingSessionResponse;
 import net.neuralm.client.messages.serializer.JsonSerializer;
@@ -23,6 +28,8 @@ import net.neuralm.client.neat.TrainingRoomSettings;
 public class NeuralmClientMain {
 
     private static UUID userId;
+    private static TrainingSession trainingSession;
+    private static int i;
 
     public static void main(String... args) throws IOException, InterruptedException {
         String host = args.length >= 1 ? args[0] : "127.0.0.1";
@@ -46,7 +53,7 @@ public class NeuralmClientMain {
             System.out.println(response.isSuccess() ? "Authenticated..." : String.format("Authenticating failed: %s", response.getMessage()));
             userId = response.getUserId();
             System.out.println(String.format("Creating room with name %s", trainingRoomName));
-            client.send(new CreateTrainingRoomRequest(response.getUserId(), trainingRoomName, new TrainingRoomSettings().setOrganismCount(1000)));
+            client.send(new CreateTrainingRoomRequest(response.getUserId(), trainingRoomName, new TrainingRoomSettings().setOrganismCount(20)));
         });
 
         client.addListener("CreateTrainingRoomResponse", (changeEvent) -> {
@@ -80,7 +87,8 @@ public class NeuralmClientMain {
             StartTrainingSessionResponse response = (StartTrainingSessionResponse) changeEvent.getNewValue();
 
             if (response.isSuccess()) {
-                Request getOrganismRequest = new GetOrganismsRequest(response.getTrainingSession().Id, 10);
+                trainingSession = response.getTrainingSession();
+                Request getOrganismRequest = new GetOrganismsRequest(trainingSession.Id, 10);
                 client.send(getOrganismRequest);
             } else {
                 System.err.println(String.format("StartTrainingSessionResponse failed %s", response.getMessage()));
@@ -92,12 +100,39 @@ public class NeuralmClientMain {
 
             if (response.isSuccess()) {
                 System.out.println(String.format("Got %s organism", response.getOrganisms().size()));
+
+                Random random = new Random();
                 for (Organism organism : response.getOrganisms()) {
                     System.out.println(organism.name);
+                    organism.score = random.nextDouble() + 0.00001;
                 }
+
+                Request postOrganismsScoreRequest = new PostOrganismsScoreRequest(trainingSession.Id, response.getOrganisms());
+                client.send(postOrganismsScoreRequest);
             } else {
                 System.err.println(String.format("GetOrganismsResponse failed %s", response.getMessage()));
             }
+        });
+
+        client.addListener("PostOrganismsScoreResponse", (changeEvent) -> {
+            PostOrganismsScoreResponse response = (PostOrganismsScoreResponse) changeEvent.getNewValue();
+            System.out.println(String.format("PostOrganismsScoreResponse was %s", response.isSuccess() ? "successful" : "unsuccessful"));
+
+            i++;
+            if (i == 3) {
+                Request request = new EndTrainingSessionRequest(trainingSession.Id);
+                client.send(request);
+            } else {
+                Request getOrganismRequest = new GetOrganismsRequest(trainingSession.Id, 10);
+                client.send(getOrganismRequest);
+            }
+        });
+
+        client.addListener("EndTrainingSessionResponse", (changeEvent) -> {
+            Response response = (Response) changeEvent.getNewValue();
+            System.out.println(String.format("EndTrainingSessionResponse was %s", response.isSuccess() ? "successful" : "unsuccessful"));
+
+            System.exit(0);
         });
 
         client.addListener("Connected", evt -> {
