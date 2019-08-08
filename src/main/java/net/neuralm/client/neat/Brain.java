@@ -11,6 +11,11 @@ import net.neuralm.client.neat.neurons.OutputNeuron;
 
 public class Brain {
 
+    UUID id;
+    UUID trainingRoomId;
+    UUID organismId;
+    private List<ConnectionGene> connectionGenes = new ArrayList<>();
+
     private final List<OutputNeuron> outputNeurons = new ArrayList<>();
     private final List<InputNeuron> inputNeurons = new ArrayList<>();
     private final HashMap<Integer, AbstractNeuron> neurons = new HashMap<>();
@@ -18,6 +23,7 @@ public class Brain {
     private UUID trainingRoomId;
     private UUID organismId;
     private List<ConnectionGene> connectionGenes = new ArrayList<>();
+  
     private boolean buildStructure = false;
     private TrainingRoom trainingRoom;
     private Organism organism;
