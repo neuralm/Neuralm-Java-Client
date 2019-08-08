@@ -11,55 +11,54 @@ import net.neuralm.client.neat.neurons.OutputNeuron;
 
 public class Brain {
 
-    UUID id;
-    UUID trainingRoomId;
-    UUID organismId;
-    private List<ConnectionGene> connectionGenes = new ArrayList<>();
-
     private final List<OutputNeuron> outputNeurons = new ArrayList<>();
     private final List<InputNeuron> inputNeurons = new ArrayList<>();
     private final HashMap<Integer, AbstractNeuron> neurons = new HashMap<>();
-    private int inputCount;
-    private int outputCount;
-
-
+    private UUID id;
+    private UUID trainingRoomId;
+    private UUID organismId;
+    private List<ConnectionGene> connectionGenes = new ArrayList<>();
     private boolean buildStructure = false;
+    private TrainingRoom trainingRoom;
+    private Organism organism;
 
     public Brain() {
 
     }
 
     /**
-     * Create a brain with the given input and output count and the given genes.
+     * Create a brain with the given trainingRoom and the given genes.
      *
-     * @param inputCount Amount of input neurons
-     * @param outputCount Amount of output neurons
+     * @param trainingRoom The trainingRoom this brain is part of
      * @param genes Amount of genes
      */
-    public Brain(int inputCount, int outputCount, List<ConnectionGene> genes) {
-        this.inputCount = inputCount;
-        this.outputCount = outputCount;
+    public Brain(TrainingRoom trainingRoom, List<ConnectionGene> genes) {
+        this.trainingRoom = trainingRoom;
         this.connectionGenes = genes;
     }
 
     /**
      * Evaluate the brain with the given inputs
      *
-     * @param inputs A double array with the size {@link Brain#inputCount}
-     * @return A double array with size {@link Brain#outputCount} where index i has the output value of the output neuron with id {@link Brain#inputCount}+i
+     * @param inputs A double array with the size {@link TrainingRoomSettings#getInputCount()}
+     * @return A double array with size {@link TrainingRoomSettings#getOutputCount()} where index i has the output value of the output neuron with id {@link TrainingRoomSettings#getInputCount}+i
      */
     public double[] evaluate(double[] inputs) {
+        if (trainingRoom == null) {
+            throw new NullPointerException("trainingRoom is null, make sure Organism#initialze is called!");
+        }
+
         if (!buildStructure) {
-            for (int i = 0; i < inputCount; i++) {
+            for (int i = 0; i < trainingRoom.trainingRoomSettings.getInputCount(); i++) {
                 InputNeuron neuron = new InputNeuron();
                 inputNeurons.add(neuron);
                 neurons.put(i, neuron);
             }
 
-            for (int i = 0; i < outputCount; i++) {
+            for (int i = 0; i < trainingRoom.trainingRoomSettings.getOutputCount(); i++) {
                 OutputNeuron neuron = new OutputNeuron();
                 outputNeurons.add(neuron);
-                neurons.put(inputCount + i, neuron);
+                neurons.put(trainingRoom.trainingRoomSettings.getInputCount() + i, neuron);
             }
 
             for (ConnectionGene connectionGene : connectionGenes) {
@@ -96,5 +95,23 @@ public class Brain {
         }
 
         return neurons.get(neuronId);
+    }
+
+    /**
+     * Initialize the brain, this will make sure it is ready to be used.
+     *
+     * @param trainingRoom The trainingroom this brain is in.
+     * @param organism The organism whose brain this is
+     */
+    public void initialize(TrainingRoom trainingRoom, Organism organism) {
+        if (!trainingRoom.id.equals(trainingRoomId)) {
+            throw new IllegalArgumentException(String.format("The given trainingRoomID %s does not match the expected trainingRoomID %s", trainingRoom.id, id));
+        }
+        if (!organism.id.equals(organismId)) {
+            throw new IllegalArgumentException(String.format("The given organismId %s does not match the expected organismId %s", organism.id, organismId));
+        }
+
+        this.trainingRoom = trainingRoom;
+        this.organism = organism;
     }
 }

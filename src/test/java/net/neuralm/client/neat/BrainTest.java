@@ -10,7 +10,9 @@ class BrainTest {
     @ParameterizedTest
     @CsvFileSource(resources = "/evaluateTest.csv")
     void evaluate(double inA, double inB, double inC, double expected) {
-        Brain brain = new Brain(3, 1, Arrays.asList(
+        TrainingRoom room = new TrainingRoom();
+        room.trainingRoomSettings = new TrainingRoomSettings().setInputCount(3).setOutputCount(1);
+        Brain brain = new Brain(room, Arrays.asList(
 
             new ConnectionGene(0, 3, 1, true),
             new ConnectionGene(1, 3, 1, false),

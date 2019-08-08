@@ -5,8 +5,8 @@ import net.neuralm.client.neat.neurons.AbstractNeuron;
 
 public class ConnectionGene {
 
-    UUID id;
-    UUID brainId;
+    private UUID id;
+    private UUID brainId;
     private int inID;
     private int outID;
     private int innovationNumber;

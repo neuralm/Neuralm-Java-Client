@@ -1,6 +1,7 @@
 package net.neuralm.client;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.UUID;
 import net.neuralm.client.entities.TrainingSession;
@@ -53,7 +54,7 @@ public class NeuralmClientMain {
             System.out.println(response.isSuccess() ? "Authenticated..." : String.format("Authenticating failed: %s", response.getMessage()));
             userId = response.getUserId();
             System.out.println(String.format("Creating room with name %s", trainingRoomName));
-            client.send(new CreateTrainingRoomRequest(response.getUserId(), trainingRoomName, new TrainingRoomSettings().setOrganismCount(20)));
+            client.send(new CreateTrainingRoomRequest(response.getUserId(), trainingRoomName, new TrainingRoomSettings().setOrganismCount(20).setInputCount(3).setOutputCount(1)));
         });
 
         client.addListener("CreateTrainingRoomResponse", (changeEvent) -> {
@@ -103,8 +104,9 @@ public class NeuralmClientMain {
 
                 Random random = new Random();
                 for (Organism organism : response.getOrganisms()) {
-                    System.out.println(organism.name);
                     organism.score = random.nextDouble() + 0.00001;
+                    organism.initialize(trainingSession.trainingRoom);
+                    System.out.println(organism.name + " has output: " + Arrays.toString(organism.evaluate(new double[]{0, 1, 2})));
                 }
 
                 Request postOrganismsScoreRequest = new PostOrganismsScoreRequest(trainingSession.Id, response.getOrganisms());
