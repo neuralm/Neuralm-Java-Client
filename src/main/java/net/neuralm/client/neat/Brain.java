@@ -51,7 +51,7 @@ public class Brain {
      */
     public double[] evaluate(double[] inputs) {
         if (trainingRoom == null) {
-            throw new NullPointerException("trainingRoom is null, make sure Organism#initialze is called!");
+            throw new NullPointerException("trainingRoom is null, make sure Organism#initialize is called!");
         }
 
         if (!buildStructure) {
