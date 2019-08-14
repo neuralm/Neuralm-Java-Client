@@ -19,10 +19,6 @@ public class Brain {
     private final List<OutputNeuron> outputNeurons = new ArrayList<>();
     private final List<InputNeuron> inputNeurons = new ArrayList<>();
     private final HashMap<Integer, AbstractNeuron> neurons = new HashMap<>();
-    private UUID id;
-    private UUID trainingRoomId;
-    private UUID organismId;
-    private List<ConnectionGene> connectionGenes = new ArrayList<>();
   
     private boolean buildStructure = false;
     private TrainingRoom trainingRoom;
