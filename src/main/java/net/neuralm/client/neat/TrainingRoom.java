@@ -1,7 +1,8 @@
 package net.neuralm.client.neat;
 
-import java.util.UUID;
 import net.neuralm.client.entities.User;
+
+import java.util.UUID;
 
 public class TrainingRoom {
 
@@ -10,8 +11,5 @@ public class TrainingRoom {
     public User owner;
     public int generation;
     public TrainingRoomSettings trainingRoomSettings;
-    public double highestScore;
-    public double lowestScore;
-    public double averageScore;
 
 }

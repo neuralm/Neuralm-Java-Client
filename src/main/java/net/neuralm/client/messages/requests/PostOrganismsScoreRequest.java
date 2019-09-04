@@ -1,16 +1,17 @@
 package net.neuralm.client.messages.requests;
 
+import net.neuralm.client.neat.Organism;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import net.neuralm.client.neat.Organism;
 
 public class PostOrganismsScoreRequest extends Request {
 
-    public UUID trainingSessionId;
+    public final UUID trainingSessionId;
 
-    public Map<UUID, Double> organismScores;
+    public final Map<UUID, Double> organismScores;
 
     /**
      * Create a PostOrganismsScoreRequest to send the organisms' score to the server
@@ -33,7 +34,7 @@ public class PostOrganismsScoreRequest extends Request {
         this(trainingSessionId, new HashMap<>(organisms.size()));
 
         for (Organism organism : organisms) {
-            organismScores.put(organism.id, organism.score);
+            organismScores.put(organism.getId(), organism.getScore());
         }
     }
 }

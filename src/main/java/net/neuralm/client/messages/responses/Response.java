@@ -30,6 +30,7 @@ public class Response {
      * The time date this response was send.
      * @return The date as a string in the following format: "yyyy-MM-dd'T'HH:mm:ss'.'SSSSSSS'Z'"
      */
+    @SuppressWarnings("SpellCheckingInspection")
     public String getDateTime() {
         return dateTime;
     }

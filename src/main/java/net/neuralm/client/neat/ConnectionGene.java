@@ -1,42 +1,38 @@
 package net.neuralm.client.neat;
 
+import net.neuralm.client.neat.nodes.AbstractNode;
+
 import java.util.UUID;
-import net.neuralm.client.neat.neurons.AbstractNeuron;
 
 public class ConnectionGene {
 
-    private UUID id;
-    private UUID brainId;
-    private int inID;
-    private int outID;
-    private int innovationNumber;
-    private double weight;
-    private boolean enabled;
+    public UUID id;
+    public UUID organismId;
+    public final int inNodeIdentifier;
+    public final int outNodeIdentifier;
+    public int innovationNumber;
+    public final double weight;
+    public final boolean enabled;
 
-    private AbstractNeuron inputNeuron;
-    private AbstractNeuron outputNeuron;
+    private AbstractNode in;
+    private AbstractNode out;
 
-    public ConnectionGene() {
-
-    }
-
-    public ConnectionGene(int inId, int outId, double weight, boolean enabled) {
-        this.inID = inId;
-        this.outID = outId;
+    public ConnectionGene(int inNodeIdentifier, int outNodeIdentifier, double weight, boolean enabled) {
+        this.inNodeIdentifier = inNodeIdentifier;
+        this.outNodeIdentifier = outNodeIdentifier;
         this.weight = weight;
         this.enabled = enabled;
     }
 
-    public double getValue() {
-        return inputNeuron.getValue() * weight;
+    public void buildStructure(Organism organism) {
+        if (!enabled) return;
+
+        this.in = organism.getNodeFromIdentifier(inNodeIdentifier);
+        this.out = organism.getNodeFromIdentifier(outNodeIdentifier);
+        this.out.addDependency(this);
     }
 
-    void initializeStructure(Brain brain) {
-        if (enabled) {
-            inputNeuron = brain.getNeuronOrCreate(inID);
-            outputNeuron = brain.getNeuronOrCreate(outID);
-
-            outputNeuron.addDependency(this);
-        }
+    public double getValue() {
+        return in.getValue() * weight;
     }
 }

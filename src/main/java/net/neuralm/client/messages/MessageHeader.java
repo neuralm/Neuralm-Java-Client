@@ -7,7 +7,7 @@ import java.nio.charset.StandardCharsets;
 public class MessageHeader {
 
     private final int bodySize;
-    private String typeName;
+    private final String typeName;
 
     private MessageHeader(int bodySize, String typeName) {
         this.bodySize = bodySize;

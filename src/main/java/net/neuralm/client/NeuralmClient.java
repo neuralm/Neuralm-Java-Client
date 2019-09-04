@@ -31,10 +31,10 @@ public class NeuralmClient {
     private final int port;
     private final ISerializer serializer;
     private final ReadHandler readHandler;
-    AtomicBoolean isWriting = new AtomicBoolean(false);
+    final AtomicBoolean isWriting = new AtomicBoolean(false);
     private AsynchronousTlsChannel channel;
     private ByteBuffer writeBuffer = ByteBuffer.allocate(0);
-    private Queue<Message> sendQueue = new LinkedBlockingDeque<>();
+    private final Queue<Message> sendQueue = new LinkedBlockingDeque<>();
 
 
     /**

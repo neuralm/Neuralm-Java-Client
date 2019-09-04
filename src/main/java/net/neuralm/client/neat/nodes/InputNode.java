@@ -1,10 +1,14 @@
-package net.neuralm.client.neat.neurons;
+package net.neuralm.client.neat.nodes;
 
 import net.neuralm.client.neat.ConnectionGene;
 
-public class InputNeuron extends AbstractNeuron {
+public class InputNode extends AbstractNode {
 
     private double value;
+
+    public InputNode(int nodeIdentifier) {
+        super(nodeIdentifier);
+    }
 
     @Override
     public double getValue() {

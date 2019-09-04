@@ -1,12 +1,18 @@
-package net.neuralm.client.neat.neurons;
+package net.neuralm.client.neat.nodes;
+
+import net.neuralm.client.neat.ConnectionGene;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.neuralm.client.neat.ConnectionGene;
 
-public abstract class AbstractNeuron {
+public abstract class AbstractNode {
 
-    private List<ConnectionGene> dependencies = new ArrayList<ConnectionGene>();
+    public final int nodeIdentifier;
+    private final List<ConnectionGene> dependencies = new ArrayList<>();
+
+    AbstractNode(int nodeIdentifier) {
+        this.nodeIdentifier = nodeIdentifier;
+    }
 
     public double getValue() {
         if (dependencies.size() == 0) {
@@ -19,6 +25,7 @@ public abstract class AbstractNeuron {
         for (ConnectionGene gene : dependencies) {
             total += gene.getValue();
             count++;
+
         }
 
         return activationFunction(total / count);
