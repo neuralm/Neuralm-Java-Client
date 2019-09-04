@@ -1,9 +1,10 @@
 package net.neuralm.client.messages;
 
+import net.neuralm.client.messages.serializer.ISerializer;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
-import net.neuralm.client.messages.serializer.ISerializer;
 
 public class Message {
 
@@ -15,6 +16,13 @@ public class Message {
         this.bodyBytes = bodyBytes;
     }
 
+    /**
+     * Construct a message object from the given object with the given serializer.
+     * It will be turned into bytes and a header will be created.
+     * @param serializer The serializer to use.
+     * @param message The object that should be turned into a message
+     * @return The message with the headerBytes and bodyBytes.
+     */
     public static Message constructMessage(ISerializer serializer, Object message) {
         byte[] bodyBytes = serializer.serialize(message);
         byte[] messageTypeBytes = message.getClass().getSimpleName().getBytes(StandardCharsets.UTF_8);
@@ -25,6 +33,14 @@ public class Message {
         return new Message(headerBytes, bodyBytes);
     }
 
+    /**
+     * Turn a byte array representing an object into that object.
+     * It will deserialize the bytes using the given serializer.
+     * @param serializer The serializer to use.
+     * @param header The header corresponding to the data being deserialized.
+     * @param bodyBytes The data to deserialize
+     * @return null if the serializer fails or no class corresponding to {@link MessageHeader#getTypeName()} is found.
+     */
     public static Object deconstructMessageBody(ISerializer serializer, MessageHeader header, byte[] bodyBytes) {
         Class<?> clazz;
         try {

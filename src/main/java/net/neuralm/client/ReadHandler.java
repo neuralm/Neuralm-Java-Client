@@ -1,18 +1,21 @@
 package net.neuralm.client;
 
-import java.nio.ByteBuffer;
-import java.nio.channels.CompletionHandler;
 import net.neuralm.client.messages.Message;
 import net.neuralm.client.messages.MessageHeader;
 import net.neuralm.client.messages.responses.Response;
 import net.neuralm.client.messages.serializer.ISerializer;
+
+import java.nio.ByteBuffer;
+import java.nio.channels.CompletionHandler;
 
 public class ReadHandler implements CompletionHandler<Integer, ByteBuffer> {
 
     private final NeuralmClient client;
 
     MessageHeader currentHeader;
-    ISerializer serializer;
+    final ISerializer serializer;
+
+    ByteBuffer currentBody;
 
     public ReadHandler(NeuralmClient client, ISerializer serializer) {
         this.client = client;
@@ -36,19 +39,24 @@ public class ReadHandler implements CompletionHandler<Integer, ByteBuffer> {
             }
 
             client.startReading(currentHeader.getBodySize());
+            currentBody = ByteBuffer.allocate(currentHeader.getBodySize());
         } else {
+            currentBody.put(bytes);
+
             client.startReading();
 
-            Object response = Message.deconstructMessageBody(serializer, currentHeader, bytes);
-            if (response instanceof Response) {
-                client.addResponse((Response) response);
-            } else {
-                System.err.println(String.format("Received response that wasn't a response! Bytes: %s", bytes));
+            if (currentBody.position() == currentBody.capacity()) {
+                Object response = Message.deconstructMessageBody(serializer, currentHeader, currentBody.array());
+
+                if (response instanceof Response) {
+                    client.addResponse((Response) response);
+                } else {
+                    System.err.println(String.format("Received response that wasn't a response! Bytes: %s", currentBody.array()));
+                }
+
+                currentHeader = null;
             }
-
-            currentHeader = null;
         }
-
     }
 
     @Override

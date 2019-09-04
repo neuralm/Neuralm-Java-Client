@@ -5,15 +5,15 @@ import java.util.UUID;
 
 public class TrainingRoomSettings {
 
-    static Random random = new Random();
+    static final Random random = new Random();
 
     private UUID id = UUID.randomUUID();
     private int organismCount = 100;
     private int inputCount = 3;
     private int outputCount = 1;
-    private double c1 = 1;
-    private double c2 = 0.4;
-    private double c3 = 0.4;
+    private double speciesExcessGeneWeight = 1;
+    private double speciesDisjointGeneWeight = 0.4;
+    private double speciesAverageWeightDiffWeight = 0.4;
     private double threshold = 3;
     private double addConnectionChance = 0.05;
     private double addNodeChance = 0.03;
@@ -62,30 +62,30 @@ public class TrainingRoomSettings {
         return this;
     }
 
-    public double getC1() {
-        return c1;
+    public double getSpeciesExcessGeneWeight() {
+        return speciesExcessGeneWeight;
     }
 
-    public TrainingRoomSettings setC1(double c1) {
-        this.c1 = c1;
+    public TrainingRoomSettings setSpeciesExcessGeneWeight(double speciesExcessGeneWeight) {
+        this.speciesExcessGeneWeight = speciesExcessGeneWeight;
         return this;
     }
 
-    public double getC2() {
-        return c2;
+    public double getSpeciesDisjointGeneWeight() {
+        return speciesDisjointGeneWeight;
     }
 
-    public TrainingRoomSettings setC2(double c2) {
-        this.c2 = c2;
+    public TrainingRoomSettings setSpeciesDisjointGeneWeight(double speciesDisjointGeneWeight) {
+        this.speciesDisjointGeneWeight = speciesDisjointGeneWeight;
         return this;
     }
 
-    public double getC3() {
-        return c3;
+    public double getSpeciesAverageWeightDiffWeight() {
+        return speciesAverageWeightDiffWeight;
     }
 
-    public TrainingRoomSettings setC3(double c3) {
-        this.c3 = c3;
+    public TrainingRoomSettings setSpeciesAverageWeightDiffWeight(double speciesAverageWeightDiffWeight) {
+        this.speciesAverageWeightDiffWeight = speciesAverageWeightDiffWeight;
         return this;
     }
 

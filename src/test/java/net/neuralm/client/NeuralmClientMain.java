@@ -1,36 +1,22 @@
 package net.neuralm.client;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Random;
-import java.util.UUID;
 import net.neuralm.client.entities.TrainingSession;
-import net.neuralm.client.messages.requests.AuthenticateRequest;
-import net.neuralm.client.messages.requests.CreateTrainingRoomRequest;
-import net.neuralm.client.messages.requests.EndTrainingSessionRequest;
-import net.neuralm.client.messages.requests.GetEnabledTrainingRoomsRequest;
-import net.neuralm.client.messages.requests.GetOrganismsRequest;
-import net.neuralm.client.messages.requests.PostOrganismsScoreRequest;
-import net.neuralm.client.messages.requests.RegisterRequest;
-import net.neuralm.client.messages.requests.Request;
-import net.neuralm.client.messages.requests.StartTrainingSessionRequest;
-import net.neuralm.client.messages.responses.AuthenticateResponse;
-import net.neuralm.client.messages.responses.CreateTrainingRoomResponse;
-import net.neuralm.client.messages.responses.GetEnabledTrainingRoomsResponse;
-import net.neuralm.client.messages.responses.GetOrganismsResponse;
-import net.neuralm.client.messages.responses.PostOrganismsScoreResponse;
-import net.neuralm.client.messages.responses.Response;
-import net.neuralm.client.messages.responses.StartTrainingSessionResponse;
+import net.neuralm.client.messages.requests.*;
+import net.neuralm.client.messages.responses.*;
 import net.neuralm.client.messages.serializer.JsonSerializer;
 import net.neuralm.client.neat.Organism;
 import net.neuralm.client.neat.TrainingRoom;
 import net.neuralm.client.neat.TrainingRoomSettings;
 
+import java.io.IOException;
+import java.util.Random;
+import java.util.UUID;
+
 public class NeuralmClientMain {
 
     private static UUID userId;
     private static TrainingSession trainingSession;
-    private static int i;
+    private static int organismBatchesProcessed;
 
     public static void main(String... args) throws IOException, InterruptedException {
         String host = args.length >= 1 ? args[0] : "127.0.0.1";
@@ -89,7 +75,7 @@ public class NeuralmClientMain {
 
             if (response.isSuccess()) {
                 trainingSession = response.getTrainingSession();
-                Request getOrganismRequest = new GetOrganismsRequest(trainingSession.Id, 10);
+                Request getOrganismRequest = new GetOrganismsRequest(trainingSession.id, 10);
                 client.send(getOrganismRequest);
             } else {
                 System.err.println(String.format("StartTrainingSessionResponse failed %s", response.getMessage()));
@@ -104,12 +90,12 @@ public class NeuralmClientMain {
 
                 Random random = new Random();
                 for (Organism organism : response.getOrganisms()) {
-                    organism.score = random.nextDouble() + 0.00001;
-                    organism.initialize(trainingSession.trainingRoom);
-                    System.out.println(organism.name + " has output: " + Arrays.toString(organism.evaluate(new double[]{0, 1, 2})));
+                    organism.setScore(random.nextDouble() + 0.00001);
+                    organism.initialize();
+//                    System.out.println(organism.name + " has output: " + Arrays.toString(organism.getValue(new double[]{0, 1, 2})));
                 }
 
-                Request postOrganismsScoreRequest = new PostOrganismsScoreRequest(trainingSession.Id, response.getOrganisms());
+                Request postOrganismsScoreRequest = new PostOrganismsScoreRequest(trainingSession.id, response.getOrganisms());
                 client.send(postOrganismsScoreRequest);
             } else {
                 System.err.println(String.format("GetOrganismsResponse failed %s", response.getMessage()));
@@ -120,12 +106,12 @@ public class NeuralmClientMain {
             PostOrganismsScoreResponse response = (PostOrganismsScoreResponse) changeEvent.getNewValue();
             System.out.println(String.format("PostOrganismsScoreResponse was %s", response.isSuccess() ? "successful" : "unsuccessful"));
 
-            i++;
-            if (i == 3) {
-                Request request = new EndTrainingSessionRequest(trainingSession.Id);
+            organismBatchesProcessed++;
+            if (organismBatchesProcessed == 3) {
+                Request request = new EndTrainingSessionRequest(trainingSession.id);
                 client.send(request);
             } else {
-                Request getOrganismRequest = new GetOrganismsRequest(trainingSession.Id, 10);
+                Request getOrganismRequest = new GetOrganismsRequest(trainingSession.id, 10);
                 client.send(getOrganismRequest);
             }
         });
