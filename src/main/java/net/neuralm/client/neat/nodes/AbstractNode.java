@@ -8,13 +8,22 @@ import java.util.List;
 public abstract class AbstractNode {
 
     public final int nodeIdentifier;
-    private final List<ConnectionGene> dependencies = new ArrayList<>();
+    private List<ConnectionGene> dependencies;
+
+    public AbstractNode() {
+        this(-1);
+    }
 
     AbstractNode(int nodeIdentifier) {
+        this.dependencies = new ArrayList<>();
         this.nodeIdentifier = nodeIdentifier;
     }
 
     public double getValue() {
+        if(dependencies == null) {
+            dependencies = new ArrayList<>();
+        }
+
         if (dependencies.size() == 0) {
             return activationFunction(0);
         }
@@ -36,6 +45,10 @@ public abstract class AbstractNode {
     }
 
     public void addDependency(ConnectionGene connectionGene) {
+        if(dependencies == null) {
+            dependencies = new ArrayList<>();
+        }
+
         dependencies.add(connectionGene);
     }
 }
