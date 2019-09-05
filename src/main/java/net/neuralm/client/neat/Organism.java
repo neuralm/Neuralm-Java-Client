@@ -12,10 +12,10 @@ import java.util.UUID;
 
 public class Organism {
 
-    private final List<ConnectionGene> connectionGenes;
+    public final List<ConnectionGene> connectionGenes;
     private final List<InputNode> inputNodes;
     private final List<OutputNode> outputNodes;
-    private final List<HiddenNode> hiddenNodes = new ArrayList<>();
+    private List<HiddenNode> hiddenNodes;
     private UUID id;
     private double score;
     private String name;
@@ -101,6 +101,10 @@ public class Organism {
 
         if (outputNode.isPresent()) {
             return outputNode.get();
+        }
+
+        if(hiddenNodes == null) {
+            hiddenNodes  = new ArrayList<>();
         }
 
         return hiddenNodes.stream().filter(n -> n.nodeIdentifier == nodeIdentifier).findAny().orElse(

@@ -40,7 +40,8 @@ public class NeuralmClientMain {
             System.out.println(response.isSuccess() ? "Authenticated..." : String.format("Authenticating failed: %s", response.getMessage()));
             userId = response.getUserId();
             System.out.println(String.format("Creating room with name %s", trainingRoomName));
-            client.send(new CreateTrainingRoomRequest(response.getUserId(), trainingRoomName, new TrainingRoomSettings().setOrganismCount(20).setInputCount(3).setOutputCount(1)));
+            client.send(new CreateTrainingRoomRequest(response.getUserId(), trainingRoomName, new TrainingRoomSettings().setOrganismCount(20).setInputCount(3).setOutputCount(1).setSeed(10).setAddConnectionChance(1).setAddNodeChance(1
+            )));
         });
 
         client.addListener("CreateTrainingRoomResponse", (changeEvent) -> {
