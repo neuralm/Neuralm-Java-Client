@@ -9,6 +9,7 @@ import net.neuralm.client.neat.TrainingRoom;
 import net.neuralm.client.neat.TrainingRoomSettings;
 
 import java.io.IOException;
+import java.util.Random;
 import java.util.UUID;
 
 public class NeuralmClientMain {

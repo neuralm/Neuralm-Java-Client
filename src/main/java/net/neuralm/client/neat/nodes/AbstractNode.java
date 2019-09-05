@@ -48,7 +48,7 @@ public abstract class AbstractNode {
         if(dependencies == null) {
             dependencies = new ArrayList<>();
         }
-
+      
         dependencies.add(connectionGene);
     }
 }
