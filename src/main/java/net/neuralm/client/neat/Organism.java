@@ -5,14 +5,11 @@ import net.neuralm.client.neat.nodes.HiddenNode;
 import net.neuralm.client.neat.nodes.InputNode;
 import net.neuralm.client.neat.nodes.OutputNode;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class Organism {
 
-    public final List<ConnectionGene> connectionGenes;
+    private final List<ConnectionGene> connectionGenes;
     private final List<InputNode> inputNodes;
     private final List<OutputNode> outputNodes;
     private List<HiddenNode> hiddenNodes;
@@ -20,6 +17,14 @@ public class Organism {
     private double score;
     private String name;
     private int generation;
+
+    public Organism(List<ConnectionGene> connectionGenes, int inputCount, int outputCount, UUID id, double score, String name, int generation) {
+        this(connectionGenes, inputCount, outputCount);
+        this.id = id;
+        this.score = score;
+        this.name = name;
+        this.generation = generation;
+    }
 
     public Organism(List<ConnectionGene> connectionGenes, int inputCount, int outputCount) {
         this.connectionGenes = connectionGenes;
@@ -54,6 +59,18 @@ public class Organism {
 
     public double getScore() {
         return score;
+    }
+
+    public int getInputCount() {
+        return inputNodes.size();
+    }
+
+    public int getOutputCount() {
+        return outputNodes.size();
+    }
+
+    public List<ConnectionGene> getConnectionGenes() {
+        return Collections.unmodifiableList(connectionGenes);
     }
 
     /**
@@ -107,8 +124,8 @@ public class Organism {
             hiddenNodes  = new ArrayList<>();
         }
 
-        return hiddenNodes.stream().filter(n -> n.nodeIdentifier == nodeIdentifier).findAny().orElse(
-                createAndAddNode(nodeIdentifier)
+        return hiddenNodes.stream().filter(n -> n.nodeIdentifier == nodeIdentifier).findAny().orElseGet(
+                () -> createAndAddNode(nodeIdentifier)
         );
     }
 

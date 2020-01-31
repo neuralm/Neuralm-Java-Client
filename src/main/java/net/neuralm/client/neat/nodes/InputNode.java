@@ -22,5 +22,6 @@ public class InputNode extends AbstractNode {
     @Override
     public void addDependency(ConnectionGene connectionGene) {
         System.err.println("Trying to add a dependency to an input!");
+        throw new IllegalArgumentException("Trying to add a dependency to an input!");
     }
 }
