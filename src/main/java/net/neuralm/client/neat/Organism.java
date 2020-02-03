@@ -45,6 +45,18 @@ public class Organism {
         this.initialize();
     }
 
+    public List<InputNode> getInputNodes() {
+        return Collections.unmodifiableList(inputNodes);
+    }
+
+    public List<OutputNode> getOutputNodes() {
+        return Collections.unmodifiableList(outputNodes);
+    }
+
+    public List<HiddenNode> getHiddenNodes() {
+        return Collections.unmodifiableList(hiddenNodes);
+    }
+
     public UUID getId() {
         return id;
     }
@@ -59,6 +71,10 @@ public class Organism {
 
     public double getScore() {
         return score;
+    }
+
+    public void setScore(double score) {
+        this.score = score;
     }
 
     public int getInputCount() {
@@ -120,8 +136,8 @@ public class Organism {
             return outputNode.get();
         }
 
-        if(hiddenNodes == null) {
-            hiddenNodes  = new ArrayList<>();
+        if (hiddenNodes == null) {
+            hiddenNodes = new ArrayList<>();
         }
 
         return hiddenNodes.stream().filter(n -> n.nodeIdentifier == nodeIdentifier).findAny().orElseGet(
@@ -135,9 +151,5 @@ public class Organism {
         hiddenNodes.add(node);
 
         return node;
-    }
-
-    public void setScore(double score) {
-        this.score = score;
     }
 }
